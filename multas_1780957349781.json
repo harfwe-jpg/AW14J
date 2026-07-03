@@ -1,0 +1,12 @@
+[
+  {
+    "id": 1780957301595,
+    "fecha": "8/6/2026, 4:21:41 p.m.",
+    "placa": "AS-2D-5D",
+    "tipo": "exceso-velocidad",
+    "velocidad": "240",
+    "limiteVelocidad": "60",
+    "monto": 5000,
+    "estado": "pendiente"
+  }
+]

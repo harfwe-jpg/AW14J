@@ -1,0 +1,1055 @@
+ <!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚗 Cámara de Multas Viales - Sistema de Vigilancia</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0f1428 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        #root {
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        /* Animaciones */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .animate-fadeIn {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .animate-pulse {
+            animation: pulse 2s infinite;
+        }
+
+        /* Scrollbar personalizada */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 20, 40, 0.5);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #dc2626;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #991b1b;
+        }
+
+        /* Modal backdrop */
+        .modal-backdrop {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        /* Utility classes */
+        .text-center {
+            text-align: center;
+        }
+
+        .space-y-4 > * + * {
+            margin-top: 1rem;
+        }
+
+        .space-y-6 > * + * {
+            margin-top: 1.5rem;
+        }
+
+        .space-y-8 > * + * {
+            margin-top: 2rem;
+        }
+
+        .space-y-3 > * + * {
+            margin-top: 0.75rem;
+        }
+
+        .gap-2 {
+            gap: 0.5rem;
+        }
+
+        .gap-3 {
+            gap: 0.75rem;
+        }
+
+        .gap-8 {
+            gap: 2rem;
+        }
+
+        .flex {
+            display: flex;
+        }
+
+        .items-center {
+            align-items: center;
+        }
+
+        .items-start {
+            align-items: flex-start;
+        }
+
+        .justify-between {
+            justify-content: space-between;
+        }
+
+        .justify-center {
+            justify-content: center;
+        }
+
+        .grid {
+            display: grid;
+        }
+
+        .grid-cols-2 {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .md\:grid-cols-3 {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .md\:col-span-1 {
+            grid-column: span 1;
+        }
+
+        .md\:col-span-2 {
+            grid-column: span 2;
+        }
+
+        .w-full {
+            width: 100%;
+        }
+
+        .max-w-7xl {
+            max-width: 80rem;
+        }
+
+        .mx-auto {
+            margin: 0 auto;
+        }
+
+        .mb-4 {
+            margin-bottom: 1rem;
+        }
+
+        .mb-6 {
+            margin-bottom: 1.5rem;
+        }
+
+        .mb-8 {
+            margin-bottom: 2rem;
+        }
+
+        .mb-12 {
+            margin-bottom: 3rem;
+        }
+
+        .mt-6 {
+            margin-top: 1.5rem;
+        }
+
+        .mt-8 {
+            margin-top: 2rem;
+        }
+
+        .mt-2 {
+            margin-top: 0.5rem;
+        }
+
+        .p-4 {
+            padding: 1rem;
+        }
+
+        .p-6 {
+            padding: 1.5rem;
+        }
+
+        .p-8 {
+            padding: 2rem;
+        }
+
+        .px-3 {
+            padding-left: 0.75rem;
+            padding-right: 0.75rem;
+        }
+
+        .py-2 {
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+        }
+
+        .py-3 {
+            padding-top: 0.75rem;
+            padding-bottom: 0.75rem;
+        }
+
+        .px-2 {
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+        }
+
+        .rounded {
+            border-radius: 0.375rem;
+        }
+
+        .rounded-lg {
+            border-radius: 0.5rem;
+        }
+
+        .border {
+            border: 1px solid;
+        }
+
+        .border-2 {
+            border-width: 2px;
+        }
+
+        .border-red-600 {
+            border-color: #dc2626;
+        }
+
+        .border-slate-700 {
+            border-color: #334155;
+        }
+
+        .border-slate-600 {
+            border-color: #475569;
+        }
+
+        .border-b {
+            border-bottom: 1px solid;
+        }
+
+        .border-b-2 {
+            border-bottom: 2px solid;
+        }
+
+        .border-l-4 {
+            border-left: 4px solid;
+        }
+
+        .border-t {
+            border-top: 1px solid;
+        }
+
+        .pb-3 {
+            padding-bottom: 0.75rem;
+        }
+
+        .pt-3 {
+            padding-top: 0.75rem;
+        }
+
+        .pb-8 {
+            padding-bottom: 2rem;
+        }
+
+        .text-white {
+            color: #fff;
+        }
+
+        .text-slate-300 {
+            color: #cbd5e1;
+        }
+
+        .text-slate-400 {
+            color: #94a3b8;
+        }
+
+        .text-red-400 {
+            color: #f87171;
+        }
+
+        .text-red-500 {
+            color: #ef4444;
+        }
+
+        .text-blue-400 {
+            color: #60a5fa;
+        }
+
+        .text-orange-400 {
+            color: #fb923c;
+        }
+
+        .text-sm {
+            font-size: 0.875rem;
+        }
+
+        .text-xs {
+            font-size: 0.75rem;
+        }
+
+        .text-lg {
+            font-size: 1.125rem;
+        }
+
+        .text-2xl {
+            font-size: 1.5rem;
+        }
+
+        .text-3xl {
+            font-size: 1.875rem;
+        }
+
+        .text-4xl {
+            font-size: 2.25rem;
+        }
+
+        .text-5xl {
+            font-size: 3rem;
+        }
+
+        .font-bold {
+            font-weight: 700;
+        }
+
+        .font-black {
+            font-weight: 900;
+        }
+
+        .tracking-wider {
+            letter-spacing: 0.05em;
+        }
+
+        .tracking-widest {
+            letter-spacing: 0.1em;
+        }
+
+        .tracking-tighter {
+            letter-spacing: -0.05em;
+        }
+
+        .uppercase {
+            text-transform: uppercase;
+        }
+
+        .bg-slate-700 {
+            background-color: #334155;
+        }
+
+        .bg-slate-800 {
+            background-color: #1e293b;
+        }
+
+        .bg-slate-900 {
+            background-color: #0f172a;
+        }
+
+        .bg-slate-700\/50 {
+            background-color: rgba(51, 65, 85, 0.5);
+        }
+
+        .bg-slate-800\/50 {
+            background-color: rgba(30, 41, 59, 0.5);
+        }
+
+        .bg-red-600 {
+            background-color: #dc2626;
+        }
+
+        .bg-red-700 {
+            background-color: #b91c1c;
+        }
+
+        .bg-blue-600 {
+            background-color: #2563eb;
+        }
+
+        .bg-blue-700 {
+            background-color: #1d4ed8;
+        }
+
+        .bg-white {
+            background-color: #fff;
+        }
+
+        .bg-black {
+            background-color: #000;
+        }
+
+        .bg-black\/70 {
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+
+        .bg-gradient-to-r {
+            background-image: linear-gradient(to right, var(--tw-gradient-stops));
+        }
+
+        .from-red-600 {
+            --tw-gradient-stops: #dc2626, var(--tw-gradient-to, rgba(220, 38, 38, 0));
+        }
+
+        .from-red-700 {
+            --tw-gradient-stops: #b91c1c, var(--tw-gradient-to, rgba(185, 28, 28, 0));
+        }
+
+        .to-red-700 {
+            --tw-gradient-to: #b91c1c;
+        }
+
+        .to-red-800 {
+            --tw-gradient-to: #991b1b;
+        }
+
+        .bg-gradient-to-br {
+            background-image: linear-gradient(to bottom right, var(--tw-gradient-stops));
+        }
+
+        .from-slate-900 {
+            --tw-gradient-stops: #0f172a, var(--tw-gradient-to, rgba(15, 23, 42, 0));
+        }
+
+        .to-slate-800 {
+            --tw-gradient-to: #1e293b;
+        }
+
+        .shadow-lg {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .shadow-2xl {
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .hover\:bg-slate-600:hover {
+            background-color: #475569;
+        }
+
+        .hover\:bg-slate-700:hover {
+            background-color: #334155;
+        }
+
+        .hover\:bg-red-600:hover {
+            background-color: #dc2626;
+        }
+
+        .hover\:bg-blue-600:hover {
+            background-color: #2563eb;
+        }
+
+        .hover\:bg-red-700:hover {
+            background-color: #b91c1c;
+        }
+
+        .hover\:from-red-700:hover {
+            --tw-gradient-stops: #b91c1c, var(--tw-gradient-to, rgba(185, 28, 28, 0));
+        }
+
+        .hover\:to-red-800:hover {
+            --tw-gradient-to: #991b1b;
+        }
+
+        .focus\:outline-none:focus {
+            outline: 2px solid transparent;
+            outline-offset: 2px;
+        }
+
+        .focus\:border-red-400:focus {
+            border-color: #f87171;
+        }
+
+        .focus\:ring-2:focus {
+            box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.5);
+        }
+
+        .focus\:ring-red-500\/20:focus {
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+        }
+
+        .transition-all {
+            transition: all 0.2s ease;
+        }
+
+        .transition-colors {
+            transition: color 0.2s, background-color 0.2s, border-color 0.2s;
+        }
+
+        .duration-200 {
+            transition-duration: 200ms;
+        }
+
+        .duration-300 {
+            transition-duration: 300ms;
+        }
+
+        .max-h-\[600px\] {
+            max-height: 600px;
+        }
+
+        .overflow-y-auto {
+            overflow-y: auto;
+        }
+
+        .opacity-70 {
+            opacity: 0.7;
+        }
+
+        .pointer-events-none {
+            pointer-events: none;
+        }
+
+        .cursor-pointer {
+            cursor: pointer;
+        }
+
+        .fixed {
+            position: fixed;
+        }
+
+        .inset-0 {
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+        }
+
+        .z-50 {
+            z-index: 50;
+        }
+
+        .relative {
+            position: relative;
+        }
+
+        .absolute {
+            position: absolute;
+        }
+
+        .placeholder-slate-400::placeholder {
+            color: #94a3b8;
+        }
+
+        .min-h-screen {
+            min-height: 100vh;
+        }
+
+        @media (max-width: 768px) {
+            .md\:p-8 {
+                padding: 1rem;
+            }
+
+            .md\:p-4 {
+                padding: 1rem;
+            }
+
+            .md\:text-5xl {
+                font-size: 2.25rem;
+            }
+
+            .md\:grid-cols-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // Importaciones simuladas (Lucide Icons básicos)
+        function Camera(props) {
+            return (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" {...props}>
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                    <circle cx="12" cy="13" r="4"></circle>
+                </svg>
+            );
+        }
+
+        function AlertTriangle(props) {
+            return (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" {...props}>
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3.05h16.94a2 2 0 0 0 1.71-3.05L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+            );
+        }
+
+        function Trash2(props) {
+            return (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" {...props}>
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                </svg>
+            );
+        }
+
+        function Download(props) {
+            return (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" {...props}>
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+            );
+        }
+
+        function Eye(props) {
+            return (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" {...props}>
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+            );
+        }
+
+        function X(props) {
+            return (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" {...props}>
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            );
+        }
+
+        // Aplicación Principal
+        function CameraMultas() {
+            const [registros, setRegistros] = React.useState(() => {
+                const saved = localStorage.getItem('registrosMultas');
+                return saved ? JSON.parse(saved) : [];
+            });
+
+            const [placa, setPlaca] = React.useState('');
+            const [velocidad, setVelocidad] = React.useState('');
+            const [limiteVelocidad, setLimiteVelocidad] = React.useState('60');
+            const [tipo, setTipo] = React.useState('exceso-velocidad');
+            const [selectedRegistro, setSelectedRegistro] = React.useState(null);
+            const [flashActive, setFlashActive] = React.useState(false);
+
+            React.useEffect(() => {
+                localStorage.setItem('registrosMultas', JSON.stringify(registros));
+            }, [registros]);
+
+            const calcularMulta = (velocidadMedida, limiteV, tipoInfraccion) => {
+                const exceso = velocidadMedida - limiteV;
+
+                switch(tipoInfraccion) {
+                    case 'exceso-velocidad':
+                        if (exceso <= 10) return 500;
+                        if (exceso <= 20) return 1000;
+                        if (exceso <= 30) return 2500;
+                        return 5000;
+                    case 'estacionamiento':
+                        return 1500;
+                    case 'semaforo':
+                        return 3000;
+                    case 'uso-celular':
+                        return 2000;
+                    case 'sin-cinturon':
+                        return 1000;
+                    default:
+                        return 500;
+                }
+            };
+
+            const capturarInfraccion = (e) => {
+                e.preventDefault();
+
+                if (!placa.trim()) {
+                    alert('Ingrese número de placa');
+                    return;
+                }
+
+                if (tipo === 'exceso-velocidad' && (!velocidad || !limiteVelocidad)) {
+                    alert('Ingrese velocidades para exceso de velocidad');
+                    return;
+                }
+
+                setFlashActive(true);
+                setTimeout(() => setFlashActive(false), 300);
+
+                const monto = tipo === 'exceso-velocidad'
+                    ? calcularMulta(parseInt(velocidad), parseInt(limiteVelocidad), tipo)
+                    : calcularMulta(0, 0, tipo);
+
+                const nuevoRegistro = {
+                    id: Date.now(),
+                    fecha: new Date().toLocaleString('es-MX'),
+                    placa: placa.toUpperCase(),
+                    tipo,
+                    velocidad: tipo === 'exceso-velocidad' ? velocidad : null,
+                    limiteVelocidad: tipo === 'exceso-velocidad' ? limiteVelocidad : null,
+                    monto,
+                    estado: 'pendiente'
+                };
+
+                setRegistros([nuevoRegistro, ...registros]);
+
+                setPlaca('');
+                setVelocidad('');
+                setLimiteVelocidad('60');
+                setTipo('exceso-velocidad');
+            };
+
+            const eliminarRegistro = (id) => {
+                setRegistros(registros.filter(r => r.id !== id));
+            };
+
+            const descargarJSON = () => {
+                const dataStr = JSON.stringify(registros, null, 2);
+                const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(dataBlob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `multas_${new Date().getTime()}.json`;
+                link.click();
+            };
+
+            const totalMultas = registros.reduce((sum, r) => sum + r.monto, 0);
+            const getTypeLabel = (t) => {
+                const labels = {
+                    'exceso-velocidad': 'Exceso de Velocidad',
+                    'estacionamiento': 'Estacionamiento',
+                    'semaforo': 'Semáforo en Rojo',
+                    'uso-celular': 'Uso de Celular',
+                    'sin-cinturon': 'Sin Cinturón'
+                };
+                return labels[t];
+            };
+
+            return (
+                <div className="min-h-screen" style={{
+                    background: 'linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0f1428 100%)',
+                    fontFamily: '"JetBrains Mono", monospace'
+                }}>
+                    {flashActive && (
+                        <div className="fixed inset-0 bg-white opacity-70 z-50 pointer-events-none" style={{
+                            animation: 'pulse 0.3s ease-out'
+                        }} />
+                    )}
+
+                    <div className="max-w-7xl mx-auto p-4 md:p-8">
+                        {/* Header */}
+                        <div className="mb-12 border-b-2 border-red-600 pb-8 text-center">
+                            <div className="flex items-center justify-center gap-3 mb-4">
+                                <div className="relative">
+                                    <Camera className="w-10 h-10 text-red-500" />
+                                    <div className="absolute inset-0" style={{
+                                        background: 'radial-gradient(circle, rgba(239,68,68,0.3) 0%, transparent 70%)',
+                                        borderRadius: '50%',
+                                        animation: 'pulse 2s infinite'
+                                    }} />
+                                </div>
+                                <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white">
+                                    CÁMARA VIAL
+                                </h1>
+                            </div>
+                            <p className="text-red-400 text-sm font-bold tracking-widest uppercase">
+                                Sistema de Vigilancia de Tránsito
+                            </p>
+                        </div>
+
+                        <div className="grid md:grid-cols-3 gap-8">
+                            {/* Panel Captura */}
+                            <div className="md:col-span-1">
+                                <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-lg border-2 border-red-600 p-6 shadow-2xl">
+                                    <h2 className="text-red-400 text-lg font-bold mb-6 flex items-center gap-2 uppercase tracking-wider">
+                                        <AlertTriangle className="w-5 h-5" />
+                                        Nueva Infracción
+                                    </h2>
+
+                                    <form onSubmit={capturarInfraccion} className="space-y-4">
+                                        <div>
+                                            <label className="block text-white text-xs font-bold mb-2 uppercase tracking-wider">
+                                                Placa Vehicular
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={placa}
+                                                onChange={(e) => setPlaca(e.target.value)}
+                                                placeholder="ABC-1234"
+                                                className="w-full px-3 py-2 bg-slate-700 border border-red-500 rounded text-white placeholder-slate-400"
+                                                style={{
+                                                    fontFamily: 'monospace',
+                                                    outline: 'none'
+                                                }}
+                                                onFocus={(e) => e.target.style.borderColor = '#f87171'}
+                                                onBlur={(e) => e.target.style.borderColor = '#dc2626'}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-white text-xs font-bold mb-2 uppercase tracking-wider">
+                                                Tipo de Infracción
+                                            </label>
+                                            <select
+                                                value={tipo}
+                                                onChange={(e) => setTipo(e.target.value)}
+                                                className="w-full px-3 py-2 bg-slate-700 border border-red-500 rounded text-white"
+                                                style={{ outline: 'none' }}
+                                            >
+                                                <option value="exceso-velocidad">Exceso de Velocidad</option>
+                                                <option value="estacionamiento">Estacionamiento Prohibido</option>
+                                                <option value="semaforo">Semáforo en Rojo</option>
+                                                <option value="uso-celular">Uso de Celular</option>
+                                                <option value="sin-cinturon">Sin Cinturón</option>
+                                            </select>
+                                        </div>
+
+                                        {tipo === 'exceso-velocidad' && (
+                                            <>
+                                                <div className="grid grid-cols-2 gap-3">
+                                                    <div>
+                                                        <label className="block text-white text-xs font-bold mb-2 uppercase tracking-wider">
+                                                            Velocidad Medida
+                                                        </label>
+                                                        <input
+                                                            type="number"
+                                                            value={velocidad}
+                                                            onChange={(e) => setVelocidad(e.target.value)}
+                                                            placeholder="80"
+                                                            className="w-full px-3 py-2 bg-slate-700 border border-red-500 rounded text-white placeholder-slate-400"
+                                                            style={{ outline: 'none' }}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-white text-xs font-bold mb-2 uppercase tracking-wider">
+                                                            Límite Permitido
+                                                        </label>
+                                                        <input
+                                                            type="number"
+                                                            value={limiteVelocidad}
+                                                            onChange={(e) => setLimiteVelocidad(e.target.value)}
+                                                            placeholder="60"
+                                                            className="w-full px-3 py-2 bg-slate-700 border border-red-500 rounded text-white placeholder-slate-400"
+                                                            style={{ outline: 'none' }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </>
+                                        )}
+
+                                        <button
+                                            type="submit"
+                                            className="w-full bg-gradient-to-r from-red-600 to-red-700 text-white font-bold py-3 rounded-lg uppercase tracking-wider flex items-center justify-center gap-2 mt-6 shadow-lg"
+                                            style={{
+                                                background: 'linear-gradient(to right, #dc2626, #b91c1c)',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s'
+                                            }}
+                                            onMouseEnter={(e) => e.target.style.background = 'linear-gradient(to right, #b91c1c, #991b1b)'}
+                                            onMouseLeave={(e) => e.target.style.background = 'linear-gradient(to right, #dc2626, #b91c1c)'}
+                                        >
+                                            <Camera className="w-5 h-5" />
+                                            Capturar
+                                        </button>
+                                    </form>
+
+                                    {/* Estadísticas */}
+                                    <div className="mt-8 pt-6 border-t border-slate-700 space-y-3">
+                                        <div className="bg-slate-700/50 p-3 rounded border border-slate-600">
+                                            <p className="text-slate-400 text-xs uppercase tracking-wider">Total Infracciones</p>
+                                            <p className="text-white text-3xl font-bold">{registros.length}</p>
+                                        </div>
+                                        <div className="bg-slate-700/50 p-3 rounded border border-slate-600">
+                                            <p className="text-slate-400 text-xs uppercase tracking-wider">Total Recaudado</p>
+                                            <p className="text-red-400 text-2xl font-bold">${totalMultas.toLocaleString()}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Historial */}
+                            <div className="md:col-span-2">
+                                <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-lg border-2 border-slate-700 p-6 shadow-2xl">
+                                    <div className="flex items-center justify-between mb-6">
+                                        <h2 className="text-white text-lg font-bold uppercase tracking-wider">
+                                            Historial de Infracciones
+                                        </h2>
+                                        {registros.length > 0 && (
+                                            <button
+                                                onClick={descargarJSON}
+                                                className="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-bold uppercase transition-colors"
+                                            >
+                                                <Download className="w-4 h-4" />
+                                                Exportar JSON
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    <div className="space-y-3 max-h-[600px] overflow-y-auto">
+                                        {registros.length === 0 ? (
+                                            <div className="text-center py-12 text-slate-400">
+                                                <Camera className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                                                <p className="uppercase tracking-wider text-sm">No hay infracciones registradas</p>
+                                            </div>
+                                        ) : (
+                                            registros.map(reg => (
+                                                <div
+                                                    key={reg.id}
+                                                    className="bg-slate-700/50 border-l-4 border-red-600 p-4 rounded cursor-pointer transition-all"
+                                                    style={{
+                                                        ':hover': {
+                                                            backgroundColor: 'rgba(51, 65, 85, 0.8)'
+                                                        }
+                                                    }}
+                                                    onClick={() => setSelectedRegistro(reg)}
+                                                >
+                                                    <div className="flex items-start justify-between">
+                                                        <div className="flex-1">
+                                                            <div className="flex items-center gap-2 mb-2">
+                                                                <span className="font-mono text-white font-bold text-lg">{reg.placa}</span>
+                                                                <span className="text-xs bg-red-600 text-white px-2 py-1 rounded uppercase font-bold">
+                                                                    {getTypeLabel(reg.tipo).split(' ')[0]}
+                                                                </span>
+                                                            </div>
+                                                            <p className="text-slate-400 text-xs font-mono mb-1">{reg.fecha}</p>
+                                                            <p className="text-slate-300 text-sm">{getTypeLabel(reg.tipo)}</p>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <p className="text-red-400 font-bold text-lg">${reg.monto}</p>
+                                                            <div className="flex gap-2 mt-2">
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setSelectedRegistro(reg);
+                                                                    }}
+                                                                    className="p-1 hover:bg-blue-600 rounded transition-colors"
+                                                                >
+                                                                    <Eye className="w-4 h-4 text-blue-400" />
+                                                                </button>
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        eliminarRegistro(reg.id);
+                                                                    }}
+                                                                    className="p-1 hover:bg-red-600 rounded transition-colors"
+                                                                >
+                                                                    <Trash2 className="w-4 h-4 text-red-400" />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Modal Detalles */}
+                    {selectedRegistro && (
+                        <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
+                            <div className="bg-slate-900 border-2 border-red-600 rounded-lg p-8 max-w-md w-full shadow-2xl">
+                                <div className="flex items-center justify-between mb-6">
+                                    <h3 className="text-2xl font-bold text-white">Detalles Infracción</h3>
+                                    <button
+                                        onClick={() => setSelectedRegistro(null)}
+                                        className="p-1 hover:bg-slate-800 rounded"
+                                    >
+                                        <X className="w-6 h-6 text-slate-400" />
+                                    </button>
+                                </div>
+
+                                <div className="space-y-4 mb-8">
+                                    <div className="flex justify-between pb-3 border-b border-slate-700">
+                                        <span className="text-slate-400 text-sm uppercase">Placa</span>
+                                        <span className="text-white font-bold font-mono">{selectedRegistro.placa}</span>
+                                    </div>
+                                    <div className="flex justify-between pb-3 border-b border-slate-700">
+                                        <span className="text-slate-400 text-sm uppercase">Tipo</span>
+                                        <span className="text-white font-bold">{getTypeLabel(selectedRegistro.tipo)}</span>
+                                    </div>
+                                    {selectedRegistro.velocidad && (
+                                        <>
+                                            <div className="flex justify-between pb-3 border-b border-slate-700">
+                                                <span className="text-slate-400 text-sm uppercase">Velocidad</span>
+                                                <span className="text-red-400 font-bold">{selectedRegistro.velocidad} km/h</span>
+                                            </div>
+                                            <div className="flex justify-between pb-3 border-b border-slate-700">
+                                                <span className="text-slate-400 text-sm uppercase">Límite</span>
+                                                <span className="text-white">{selectedRegistro.limiteVelocidad} km/h</span>
+                                            </div>
+                                            <div className="flex justify-between pb-3 border-b border-slate-700">
+                                                <span className="text-slate-400 text-sm uppercase">Exceso</span>
+                                                <span className="text-orange-400 font-bold">{selectedRegistro.velocidad - selectedRegistro.limiteVelocidad} km/h</span>
+                                            </div>
+                                        </>
+                                    )}
+                                    <div className="flex justify-between pb-3 border-b border-slate-700">
+                                        <span className="text-slate-400 text-sm uppercase">Fecha/Hora</span>
+                                        <span className="text-white text-sm">{selectedRegistro.fecha}</span>
+                                    </div>
+                                    <div className="flex justify-between pt-3 bg-slate-800 p-3 rounded-lg">
+                                        <span className="text-slate-300 uppercase font-bold">Monto Multa</span>
+                                        <span className="text-red-400 text-2xl font-bold">${selectedRegistro.monto}</span>
+                                    </div>
+                                </div>
+
+                                <button
+                                    onClick={() => setSelectedRegistro(null)}
+                                    className="w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-2 rounded uppercase transition-colors"
+                                >
+                                    Cerrar
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // Renderizar aplicación
+        ReactDOM.createRoot(document.getElementById('root')).render(
+            <React.StrictMode>
+                <CameraMultas />
+            </React.StrictMode>
+        );
+    </script>
+</body>
+</html>
